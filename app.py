@@ -1,11 +1,13 @@
-from app import create_app
-from app.models import db
 import os
 
-app = create_app('DevelopmentConfig')
+from app import create_app
+from app.models import db
+
+app = create_app(os.environ.get('APP_CONFIG', 'DevelopmentConfig'))
 
 
 with app.app_context():
     db.create_all()
 
-app.run(debug=True, port=int(os.environ.get('PORT', 5002)))
+if __name__ == '__main__':
+    app.run(debug=app.config.get('DEBUG', False), port=int(os.environ.get('PORT', 5002)))
