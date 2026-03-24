@@ -20,12 +20,22 @@ my_mechanic/
 │   ├── extensions.py
 │   ├── models.py
 │   └── blueprint/
-│       └── customers/
+│       ├── customers/
+│       │   ├── __init__.py
+│       │   ├── routes.py
+│       │   └── schemas.py
+│       ├── mechanics/
+│       │   ├── __init__.py
+│       │   ├── routes.py
+│       │   └── schemas.py
+│       └── service_tickets/
 │           ├── __init__.py
 │           ├── routes.py
 │           └── schemas.py
 ├── app.py
 ├── config.py
+├── docs/
+│   └── my_mechanic_factory_pattern_app.postman_collection.json
 └── requirements.txt
 ```
 
@@ -66,6 +76,26 @@ http://127.0.0.1:5002
 - `GET /customers/<id>`
 - `PUT /customers/<id>`
 - `DELETE /customers/<id>`
+
+## Mechanics Endpoints
+
+- `POST /mechanics/`
+- `GET /mechanics/`
+- `PUT /mechanics/<id>`
+- `DELETE /mechanics/<id>`
+
+## Service Ticket Endpoints
+
+- `POST /service-tickets/`
+- `PUT /service-tickets/<ticket_id>/assign-mechanic/<mechanic_id>`
+- `PUT /service-tickets/<ticket_id>/remove-mechanic/<mechanic_id>`
+- `GET /service-tickets/`
+
+## Postman Collection
+
+Import this file in Postman:
+
+- `docs/my_mechanic_factory_pattern_app.postman_collection.json`
 
 ## Example Request
 

@@ -1,0 +1,225 @@
+{
+  "info": {
+    "name": "My Mechanic Factory Pattern App",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Collection for mechanics and service tickets endpoints."
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:5002"
+    },
+    {
+      "key": "mechanic_id",
+      "value": "1"
+    },
+    {
+      "key": "customer_id",
+      "value": "1"
+    },
+    {
+      "key": "ticket_id",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "Mechanics",
+      "item": [
+        {
+          "name": "Create Mechanic",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alex Mechanic\",\n  \"email\": \"alex.mechanic@example.com\",\n  \"phone\": \"555-101-2020\",\n  \"salary\": 62000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/mechanics/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "mechanics",
+                ""
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () { pm.response.to.have.status(201); });",
+                  "var json = pm.response.json();",
+                  "if (json && json.id) { pm.collectionVariables.set('mechanic_id', json.id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Mechanics",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/mechanics/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "mechanics",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Mechanic",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"salary\": 65000,\n  \"phone\": \"555-333-4444\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/mechanics/{{mechanic_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "mechanics",
+                "{{mechanic_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Mechanic",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/mechanics/{{mechanic_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "mechanics",
+                "{{mechanic_id}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Service Tickets",
+      "item": [
+        {
+          "name": "Create Service Ticket",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_id\": {{customer_id}},\n  \"service_date\": \"2026-03-24\",\n  \"service_type\": \"Oil Change\",\n  \"vin\": \"1HGCM82633A123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/service-tickets/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "service-tickets",
+                ""
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () { pm.response.to.have.status(201); });",
+                  "var json = pm.response.json();",
+                  "if (json && json.id) { pm.collectionVariables.set('ticket_id', json.id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Assign Mechanic to Ticket",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{base_url}}/service-tickets/{{ticket_id}}/assign-mechanic/{{mechanic_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "service-tickets",
+                "{{ticket_id}}",
+                "assign-mechanic",
+                "{{mechanic_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Remove Mechanic from Ticket",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{base_url}}/service-tickets/{{ticket_id}}/remove-mechanic/{{mechanic_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "service-tickets",
+                "{{ticket_id}}",
+                "remove-mechanic",
+                "{{mechanic_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Service Tickets",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/service-tickets/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "service-tickets",
+                ""
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
