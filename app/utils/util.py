@@ -1,11 +1,13 @@
+import os
+
 from jose import jwt
 from datetime import datetime, timedelta, timezone
 import jose
 from functools import wraps
-from flask import request, jsonify 
+from flask import request, jsonify
  
 
-SECRET_KEY = " a super secret, secret key." # this tells us token is authentic
+SECRET_KEY = os.environ.get('SECRET_KEY', 'change-me-before-production')
 
 def token_required(f):
     @wraps(f)
