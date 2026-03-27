@@ -9,3 +9,4 @@ class CustomerSchema(ma.SQLAlchemyAutoSchema):
 
 customer_schema = CustomerSchema()
 customers_schema = CustomerSchema(many=True) #variant that allows for the serialization of many Users,
+login_schema = CustomerSchema(only=['email', 'password'])

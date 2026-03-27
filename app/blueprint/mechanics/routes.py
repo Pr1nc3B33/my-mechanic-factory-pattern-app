@@ -1,10 +1,29 @@
 from flask import jsonify, request
 from marshmallow import ValidationError
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from app.blueprint.mechanics import mechanics_bp
-from app.blueprint.mechanics.schemas import mechanic_schema, mechanics_schema
-from app.models import Mechanics, db
+from app.blueprint.mechanics.schemas import mechanic_schema, mechanics_schema, mechanic_login_schema
+from app.models import Mechanics, db, service_mechanic
+from app.utils.util import encode_token_mechanic, mechanic_token_required
+
+
+@mechanics_bp.route('/login', methods=['POST'])
+def mechanic_login():
+    try:
+        credentials = mechanic_login_schema.load(request.json)
+    except ValidationError as e:
+        return jsonify(e.messages), 400
+
+    mechanic = db.session.execute(
+        select(Mechanics).where(Mechanics.email == credentials['email'])
+    ).scalars().first()
+
+    if mechanic and mechanic.password == credentials['password']:
+        token = encode_token_mechanic(mechanic.id)
+        return jsonify({'status': 'success', 'message': 'Login successful', 'auth_token': token}), 200
+
+    return jsonify({'message': 'Invalid email or password'}), 401
 
 
 @mechanics_bp.route('/', methods=['POST'])
@@ -32,8 +51,22 @@ def get_mechanics():
     return mechanics_schema.jsonify(mechanics), 200
 
 
+@mechanics_bp.route('/most-tickets', methods=['GET'])
+def mechanics_most_tickets():
+    # Left-join so mechanics with 0 tickets still appear at the bottom
+    query = (
+        select(Mechanics)
+        .outerjoin(service_mechanic, Mechanics.id == service_mechanic.c.mechanic_id)
+        .group_by(Mechanics.id)
+        .order_by(func.count(service_mechanic.c.ticket_id).desc())
+    )
+    mechanics = db.session.execute(query).scalars().all()
+    return mechanics_schema.jsonify(mechanics), 200
+
+
 @mechanics_bp.route('/<int:id>', methods=['PUT'])
-def update_mechanic(id):
+@mechanic_token_required
+def update_mechanic(current_mechanic_id, id):
     mechanic = db.session.get(Mechanics, id)
     if not mechanic:
         return jsonify({'error': 'Mechanic not found'}), 404
@@ -57,7 +90,8 @@ def update_mechanic(id):
 
 
 @mechanics_bp.route('/<int:id>', methods=['DELETE'])
-def delete_mechanic(id):
+@mechanic_token_required
+def delete_mechanic(current_mechanic_id, id):
     mechanic = db.session.get(Mechanics, id)
     if not mechanic:
         return jsonify({'error': 'Mechanic not found'}), 404
