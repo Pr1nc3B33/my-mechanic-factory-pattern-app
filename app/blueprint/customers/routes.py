@@ -1,39 +1,34 @@
 from app.blueprint.customers import customers_bp
-from .schemas import customer_schema, customers_schema
-from app.models import Customer, db
+from app.blueprint.customers.schemas import customer_schema, customers_schema, login_schema
+from app.models import Customer, Service_Tickets, db
 from flask import request, jsonify
 from marshmallow import ValidationError
 from sqlalchemy import select
 from app.extensions import limiter, cache
-from app.utils.util import encode_token
 from app.utils.util import encode_token, token_required
-from app.blueprint.customers.schemas import customer_schema, customers_schema, login_schema
+from app.blueprint.service_tickets.schemas import service_tickets_schema
 
 
 
 @customers_bp.route("/login", methods = ['POST'])
 def login():
     try:
-        credentials = request.json
-        username = credentials['email']
-        password = credentials['password']
-    except KeyError:
-        return jsonify({'messages':'invalid payload'}), 400    
-    query = select(Customer).where(Customer.email == username)
+        credentials = login_schema.load(request.json)
+    except ValidationError as e:
+        return jsonify(e.messages), 400
+
+    query = select(Customer).where(Customer.email == credentials['email'])
     customer = db.session.execute(query).scalar_one_or_none()
-    
-    if customer and customer.password == password:
+
+    if customer and customer.password == credentials['password']:
         auth_token = encode_token(customer.id)
-        
-        response = {
-            "status":"success",
-            "message":"Login Successfull",
-            "auth_token": auth_token
-            
-        }
-        return jsonify(response), 200
+        return jsonify({
+            'status': 'success',
+            'message': 'Login Successful',
+            'auth_token': auth_token
+        }), 200
     else:
-        return jsonify({'message':'Invalid email or password'}), 401    
+        return jsonify({'message': 'Invalid email or password'}), 401
 
 
 @customers_bp.route("/", methods = ['GET'])
@@ -70,8 +65,17 @@ def get_customer(id):
         return jsonify({"error": "Customer not found"}), 404
     return customer_schema.jsonify(customer), 200
 
+@customers_bp.route('/my-tickets', methods=['GET'])
+@token_required
+def get_my_tickets(current_customer_id):
+    query = select(Service_Tickets).where(Service_Tickets.customer_id == current_customer_id)
+    tickets = db.session.execute(query).scalars().all()
+    return service_tickets_schema.jsonify(tickets), 200
+
+
 @customers_bp.route("/<int:id>", methods = ['PUT'])
-def update_customer(id):
+@token_required
+def update_customer(current_customer_id, id):
     customer = db.session.get(Customer, id)
     if not customer:
         return jsonify({"error": "Customer not found"}), 404
@@ -86,7 +90,8 @@ def update_customer(id):
     
 
 @customers_bp.route("/<int:id>", methods = ['DELETE'])
-def delete_customer(id):
+@token_required
+def delete_customer(current_customer_id, id):
     customer = db.session.get(Customer, id)
     if not customer:
         return jsonify({"error": "Customer not found"}), 404
