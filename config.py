@@ -21,3 +21,13 @@ class ProductionConfig(Config):
     """Production config"""
 
     DEBUG = False
+
+
+class TestingConfig(Config):
+    """Testing config"""
+
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    RATELIMIT_ENABLED = False
+    CACHE_TYPE = 'NullCache'
+    CACHE_NO_NULL_WARNING = True

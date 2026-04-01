@@ -146,6 +146,38 @@ Authorization: Bearer <token>
 
 Obtain a token by sending a `POST` to the relevant `/login` endpoint with `email` and `password` in the request body.
 
+## Swagger Documentation
+
+Interactive API documentation is available through Flask-Swagger-UI:
+
+- UI URL: `http://127.0.0.1:5002/api/docs`
+- Spec file: `app/static/swagger.yaml`
+
+The Swagger file documents each route with:
+
+- Path and endpoint
+- HTTP request method (`GET`, `POST`, `PUT`, `DELETE`)
+- Tags, summary, and description
+- Security references for token-protected routes
+- Request parameters for payload endpoints (`POST`, `PUT`)
+- Response schemas and examples
+
+## Testing (unittest)
+
+A full unittest suite is included in the `tests/` folder with one or more tests per route and negative-case coverage.
+
+### Test Files
+
+- `tests/test_customers.py`
+- `tests/test_mechanics.py`
+- `tests/test_inventory.py`
+- `tests/test_service_tickets.py`
+
+### Run Tests
+
+- Windows: `python -m unittest discover tests`
+- Mac: `python -m unittest discover tests`
+
 ## Postman Collection
 
 A ready-to-use Postman collection is included at `docs/my_mechanic_factory_pattern_app.postman_collection.json`. Import it into Postman to test all endpoints.
