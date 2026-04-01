@@ -3,7 +3,7 @@ info:
   title: "My Mechanic API"
   description: "API for managing customers, mechanics, inventory, and service tickets"
   version: "1.0.0"
-host: "127.0.0.1:5002"
+# host intentionally omitted so this spec is portable across local/dev/prod environments.
 basePath: "/"
 schemes:
   - "http"
@@ -49,6 +49,21 @@ paths:
           examples:
             application/json:
               message: Invalid email or password
+        400:
+          description: Validation error
+          schema:
+            $ref: '#/definitions/ValidationErrorResponse'
+          examples:
+            application/json:
+              email:
+                - Missing data for required field.
+        500:
+          description: Unexpected server error
+          schema:
+            $ref: '#/definitions/ServerErrorResponse'
+          examples:
+            application/json:
+              error: Internal server error
 
   /customers/:
     get:
@@ -69,7 +84,6 @@ paths:
                 name: "Jane Driver"
                 phone: "555-123-4567"
                 email: "jane@example.com"
-                password: "secret123"
     post:
       tags:
         - Customers
@@ -92,14 +106,20 @@ paths:
               name: "Jane Driver"
               phone: "555-123-4567"
               email: "jane@example.com"
-              password: "secret123"
         400:
           description: Validation or duplicate email error
           schema:
-            $ref: '#/definitions/ErrorResponse'
+            $ref: '#/definitions/ValidationErrorResponse'
           examples:
             application/json:
               error: Customer with this email already exists
+        500:
+          description: Unexpected server error
+          schema:
+            $ref: '#/definitions/ServerErrorResponse'
+          examples:
+            application/json:
+              error: Internal server error
 
   /customers/{id}:
     get:
@@ -123,7 +143,6 @@ paths:
               name: "Jane Driver"
               phone: "555-123-4567"
               email: "jane@example.com"
-              password: "secret123"
         404:
           description: Customer not found
           schema:
@@ -159,14 +178,28 @@ paths:
               name: "Jane Updated"
               phone: "555-111-2222"
               email: "jane@example.com"
-              password: "secret123"
+        400:
+          description: Validation error
+          schema:
+            $ref: '#/definitions/ValidationErrorResponse'
+          examples:
+            application/json:
+              phone:
+                - Not a valid string.
         401:
           description: Missing or invalid token
           schema:
-            $ref: '#/definitions/ErrorResponse'
+            $ref: '#/definitions/AuthErrorResponse'
           examples:
             application/json:
               message: Token is missing!
+        500:
+          description: Unexpected server error
+          schema:
+            $ref: '#/definitions/ServerErrorResponse'
+          examples:
+            application/json:
+              error: Internal server error
     delete:
       tags:
         - Customers
@@ -194,6 +227,20 @@ paths:
           examples:
             application/json:
               error: Customer not found
+        401:
+          description: Missing or invalid token
+          schema:
+            $ref: '#/definitions/AuthErrorResponse'
+          examples:
+            application/json:
+              message: Invalid token!
+        500:
+          description: Unexpected server error
+          schema:
+            $ref: '#/definitions/ServerErrorResponse'
+          examples:
+            application/json:
+              error: Internal server error
 
   /customers/my-tickets:
     get:
@@ -219,6 +266,20 @@ paths:
                 vin: "1HGCM82633A004352"
                 mechanic_ids:
                   - 1
+        401:
+          description: Missing or invalid token
+          schema:
+            $ref: '#/definitions/AuthErrorResponse'
+          examples:
+            application/json:
+              message: Token is missing!
+        500:
+          description: Unexpected server error
+          schema:
+            $ref: '#/definitions/ServerErrorResponse'
+          examples:
+            application/json:
+              error: Internal server error
 
   /mechanics/login:
     post:
@@ -249,6 +310,21 @@ paths:
           examples:
             application/json:
               message: Invalid email or password
+        400:
+          description: Validation error
+          schema:
+            $ref: '#/definitions/ValidationErrorResponse'
+          examples:
+            application/json:
+              password:
+                - Missing data for required field.
+        500:
+          description: Unexpected server error
+          schema:
+            $ref: '#/definitions/ServerErrorResponse'
+          examples:
+            application/json:
+              error: Internal server error
 
   /mechanics/:
     post:
@@ -274,7 +350,20 @@ paths:
               email: "alex@example.com"
               phone: "555-333-2222"
               salary: 82000.0
-              password: "secret123"
+        400:
+          description: Validation or duplicate email error
+          schema:
+            $ref: '#/definitions/ValidationErrorResponse'
+          examples:
+            application/json:
+              error: Mechanic with this email already exists
+        500:
+          description: Unexpected server error
+          schema:
+            $ref: '#/definitions/ServerErrorResponse'
+          examples:
+            application/json:
+              error: Internal server error
     get:
       tags:
         - Mechanics
@@ -294,7 +383,6 @@ paths:
                 email: "alex@example.com"
                 phone: "555-333-2222"
                 salary: 82000.0
-                password: "secret123"
 
   /mechanics/most-tickets:
     get:
@@ -316,7 +404,6 @@ paths:
                 email: "top@example.com"
                 phone: "555-222-1111"
                 salary: 90000.0
-                password: "secret123"
 
   /mechanics/{id}:
     put:
@@ -348,7 +435,28 @@ paths:
               email: "alex@example.com"
               phone: "555-333-2222"
               salary: 84000.0
-              password: "secret123"
+        400:
+          description: Validation error
+          schema:
+            $ref: '#/definitions/ValidationErrorResponse'
+          examples:
+            application/json:
+              salary:
+                - Not a valid number.
+        401:
+          description: Missing or invalid token
+          schema:
+            $ref: '#/definitions/AuthErrorResponse'
+          examples:
+            application/json:
+              message: Token is missing!
+        403:
+          description: Authenticated token does not have mechanic access
+          schema:
+            $ref: '#/definitions/ForbiddenResponse'
+          examples:
+            application/json:
+              message: Mechanic access required!
         404:
           description: Mechanic not found
           schema:
@@ -356,6 +464,13 @@ paths:
           examples:
             application/json:
               error: Mechanic not found
+        500:
+          description: Unexpected server error
+          schema:
+            $ref: '#/definitions/ServerErrorResponse'
+          examples:
+            application/json:
+              error: Internal server error
     delete:
       tags:
         - Mechanics
@@ -376,6 +491,34 @@ paths:
           examples:
             application/json:
               message: Mechanic deleted successfully
+        401:
+          description: Missing or invalid token
+          schema:
+            $ref: '#/definitions/AuthErrorResponse'
+          examples:
+            application/json:
+              message: Token is missing!
+        403:
+          description: Authenticated token does not have mechanic access
+          schema:
+            $ref: '#/definitions/ForbiddenResponse'
+          examples:
+            application/json:
+              message: Mechanic access required!
+        404:
+          description: Mechanic not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+          examples:
+            application/json:
+              error: Mechanic not found
+        500:
+          description: Unexpected server error
+          schema:
+            $ref: '#/definitions/ServerErrorResponse'
+          examples:
+            application/json:
+              error: Internal server error
 
   /inventory/:
     post:
@@ -399,6 +542,21 @@ paths:
               id: 1
               name: "Brake Pad"
               price: 59.99
+        400:
+          description: Validation error
+          schema:
+            $ref: '#/definitions/ValidationErrorResponse'
+          examples:
+            application/json:
+              price:
+                - Missing data for required field.
+        500:
+          description: Unexpected server error
+          schema:
+            $ref: '#/definitions/ServerErrorResponse'
+          examples:
+            application/json:
+              error: Internal server error
     get:
       tags:
         - Inventory
@@ -470,6 +628,28 @@ paths:
               id: 1
               name: "Brake Pad - Ceramic"
               price: 74.99
+        400:
+          description: Validation error
+          schema:
+            $ref: '#/definitions/ValidationErrorResponse'
+          examples:
+            application/json:
+              price:
+                - Not a valid number.
+        404:
+          description: Part not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+          examples:
+            application/json:
+              error: Part not found
+        500:
+          description: Unexpected server error
+          schema:
+            $ref: '#/definitions/ServerErrorResponse'
+          examples:
+            application/json:
+              error: Internal server error
     delete:
       tags:
         - Inventory
@@ -488,6 +668,20 @@ paths:
           examples:
             application/json:
               message: Part 1 deleted successfully
+        404:
+          description: Part not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+          examples:
+            application/json:
+              error: Part not found
+        500:
+          description: Unexpected server error
+          schema:
+            $ref: '#/definitions/ServerErrorResponse'
+          examples:
+            application/json:
+              error: Internal server error
 
   /service-tickets/:
     post:
@@ -521,6 +715,21 @@ paths:
           examples:
             application/json:
               error: Customer not found
+        400:
+          description: Validation error
+          schema:
+            $ref: '#/definitions/ValidationErrorResponse'
+          examples:
+            application/json:
+              vin:
+                - Missing data for required field.
+        500:
+          description: Unexpected server error
+          schema:
+            $ref: '#/definitions/ServerErrorResponse'
+          examples:
+            application/json:
+              error: Internal server error
     get:
       tags:
         - Service Tickets
@@ -579,6 +788,41 @@ paths:
               vin: "1HGCM82633A004352"
               mechanic_ids:
                 - 1
+        401:
+          description: Missing or invalid token
+          schema:
+            $ref: '#/definitions/AuthErrorResponse'
+          examples:
+            application/json:
+              message: Token is missing!
+        403:
+          description: Authenticated token does not have mechanic access
+          schema:
+            $ref: '#/definitions/ForbiddenResponse'
+          examples:
+            application/json:
+              message: Mechanic access required!
+        404:
+          description: Ticket or mechanic not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+          examples:
+            application/json:
+              error: Service ticket not found
+        400:
+          description: Business-rule validation error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+          examples:
+            application/json:
+              error: Mechanic already assigned to this ticket
+        500:
+          description: Unexpected server error
+          schema:
+            $ref: '#/definitions/ServerErrorResponse'
+          examples:
+            application/json:
+              error: Internal server error
 
   /service-tickets/{ticket_id}/remove-mechanic/{mechanic_id}:
     put:
@@ -615,6 +859,41 @@ paths:
               service_type: "Oil change"
               vin: "1HGCM82633A004352"
               mechanic_ids: []
+        401:
+          description: Missing or invalid token
+          schema:
+            $ref: '#/definitions/AuthErrorResponse'
+          examples:
+            application/json:
+              message: Token is missing!
+        403:
+          description: Authenticated token does not have mechanic access
+          schema:
+            $ref: '#/definitions/ForbiddenResponse'
+          examples:
+            application/json:
+              message: Mechanic access required!
+        404:
+          description: Ticket or mechanic not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+          examples:
+            application/json:
+              error: Mechanic not found
+        400:
+          description: Business-rule validation error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+          examples:
+            application/json:
+              error: Mechanic is not assigned to this ticket
+        500:
+          description: Unexpected server error
+          schema:
+            $ref: '#/definitions/ServerErrorResponse'
+          examples:
+            application/json:
+              error: Internal server error
 
   /service-tickets/{ticket_id}/edit:
     put:
@@ -650,6 +929,42 @@ paths:
                 - 2
               warnings:
                 - Mechanic 99 not found, skipped
+        401:
+          description: Missing or invalid token
+          schema:
+            $ref: '#/definitions/AuthErrorResponse'
+          examples:
+            application/json:
+              message: Token is missing!
+        403:
+          description: Authenticated token does not have mechanic access
+          schema:
+            $ref: '#/definitions/ForbiddenResponse'
+          examples:
+            application/json:
+              message: Mechanic access required!
+        404:
+          description: Ticket not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+          examples:
+            application/json:
+              error: Service ticket not found
+        400:
+          description: Validation error
+          schema:
+            $ref: '#/definitions/ValidationErrorResponse'
+          examples:
+            application/json:
+              add_ids:
+                - Not a valid list.
+        500:
+          description: Unexpected server error
+          schema:
+            $ref: '#/definitions/ServerErrorResponse'
+          examples:
+            application/json:
+              error: Internal server error
 
   /service-tickets/{ticket_id}/add-part/{inventory_id}:
     post:
@@ -687,8 +1002,50 @@ paths:
               vin: "1HGCM82633A004352"
               mechanic_ids:
                 - 1
+        401:
+          description: Missing or invalid token
+          schema:
+            $ref: '#/definitions/AuthErrorResponse'
+          examples:
+            application/json:
+              message: Token is missing!
+        403:
+          description: Authenticated token does not have mechanic access
+          schema:
+            $ref: '#/definitions/ForbiddenResponse'
+          examples:
+            application/json:
+              message: Mechanic access required!
+        404:
+          description: Ticket or part not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+          examples:
+            application/json:
+              error: Part not found
+        400:
+          description: Validation error
+          schema:
+            $ref: '#/definitions/ValidationErrorResponse'
+          examples:
+            application/json:
+              quantity:
+                - Not a valid integer.
+        500:
+          description: Unexpected server error
+          schema:
+            $ref: '#/definitions/ServerErrorResponse'
+          examples:
+            application/json:
+              error: Internal server error
 
 definitions:
+  # Definition mapping for maintainers:
+  # CustomerPayload/Response -> app/blueprint/customers/schemas.py (CustomerSchema)
+  # MechanicPayload/Response -> app/blueprint/mechanics/schemas.py (MechanicsSchema)
+  # InventoryPayload/Response -> app/blueprint/inventory/schemas.py (InventorySchema)
+  # ServiceTicketPayload/Response -> app/blueprint/service_tickets/schemas.py (ServiceTicketSchema)
+
   NoPayload:
     type: object
     description: Empty payload for compatibility with clients that always send JSON.
@@ -698,6 +1055,32 @@ definitions:
     properties:
       message:
         type: string
+      error:
+        type: string
+
+  ValidationErrorResponse:
+    type: object
+    description: Field-level validation error payload from Marshmallow.
+    additionalProperties:
+      type: array
+      items:
+        type: string
+
+  AuthErrorResponse:
+    type: object
+    properties:
+      message:
+        type: string
+
+  ForbiddenResponse:
+    type: object
+    properties:
+      message:
+        type: string
+
+  ServerErrorResponse:
+    type: object
+    properties:
       error:
         type: string
 
@@ -756,8 +1139,6 @@ definitions:
         type: string
       email:
         type: string
-      password:
-        type: string
 
   MechanicPayload:
     type: object
@@ -803,8 +1184,6 @@ definitions:
       salary:
         type: number
         format: float
-      password:
-        type: string
 
   InventoryPayload:
     type: object

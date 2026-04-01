@@ -1,8 +1,11 @@
 from app.extensions import ma
 from app.models import Mechanics
+from marshmallow import fields
 
 
 class MechanicsSchema(ma.SQLAlchemyAutoSchema):
+    password = fields.String(load_only=True)
+
     class Meta:
         model = Mechanics
 

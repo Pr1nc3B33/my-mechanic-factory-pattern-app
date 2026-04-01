@@ -152,6 +152,7 @@ Interactive API documentation is available through Flask-Swagger-UI:
 
 - UI URL: `http://127.0.0.1:5002/api/docs`
 - Spec file: `app/static/swagger.yaml`
+- In the spec, `host` is intentionally omitted so the same file works across local/dev/prod.
 
 The Swagger file documents each route with:
 
@@ -161,6 +162,17 @@ The Swagger file documents each route with:
 - Security references for token-protected routes
 - Request parameters for payload endpoints (`POST`, `PUT`)
 - Response schemas and examples
+
+### Definition-to-Schema Mapping (Maintainers)
+
+- `CustomerPayload` / `CustomerResponse` -> `app/blueprint/customers/schemas.py` (`CustomerSchema`)
+- `MechanicPayload` / `MechanicResponse` -> `app/blueprint/mechanics/schemas.py` (`MechanicsSchema`)
+- `InventoryPayload` / `InventoryResponse` -> `app/blueprint/inventory/schemas.py` (`InventorySchema`)
+- `ServiceTicketPayload` / `ServiceTicketResponse` -> `app/blueprint/service_tickets/schemas.py` (`ServiceTicketSchema`)
+
+### Running Swagger UI in Different Environments
+
+By default, Swagger UI reads `/static/swagger.yaml` from this app. If you need a different spec per environment, point `API_URL` in `app/__init__.py` to another file path (for example, `/static/swagger.dev.yaml` or `/static/swagger.prod.yaml`) and restart the app.
 
 ## Testing (unittest)
 

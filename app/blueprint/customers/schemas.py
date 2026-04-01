@@ -1,9 +1,12 @@
 from app.models import Customer
 from app.extensions import ma
+from marshmallow import fields
 
 
 
 class CustomerSchema(ma.SQLAlchemyAutoSchema):
+    password = fields.String(load_only=True)
+
     class Meta:
         model = Customer #using the SQLAlchemy model to create fields used in serialization, deserialization, and validation   
 
