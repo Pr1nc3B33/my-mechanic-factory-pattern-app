@@ -4,12 +4,12 @@ import os
 class Config:
     """Base config"""
 
+    SECRET_KEY = os.environ.get('SECRET_KEY')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         'DATABASE_URL',
         'sqlite:///my_mechanic.db',
     )
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-key-change-me')
 
 
 class DevelopmentConfig(Config):
