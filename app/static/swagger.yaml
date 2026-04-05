@@ -3,10 +3,10 @@ info:
   title: "My Mechanic API"
   description: "API for managing customers, mechanics, inventory, and service tickets"
   version: "1.0.0"
-# host intentionally omitted so this spec is portable across local/dev/prod environments.
+host: "my-mechanic-factory-pattern-app.onrender.com"
 basePath: "/"
 schemes:
-  - "http"
+  - "https"
 consumes:
   - "application/json"
 produces:
