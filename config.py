@@ -9,6 +9,7 @@ class Config:
         'DATABASE_URL',
         'sqlite:///my_mechanic.db',
     )
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-key-change-me')
 
 
 class DevelopmentConfig(Config):
